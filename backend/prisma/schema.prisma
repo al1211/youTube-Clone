@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User{
+  id              String @id @default(uuid())
+  username        String  @unique
+  password        String
+  gender          Gender
+  channelName     String
+  banner          String?
+  profilePicture  String?
+  subscriberCount  Int   @default(0)
+  description     String?
+  uploads         Uploads[]
+
+  subscribers      Subscription[] @relation("ChannelSubscriptions")
+
+  subscriberTo      Subscription[]  @relation("UserSubscriptions")
+
+}
+
+model Uploads {
+  id         String  @id   @default(uuid())
+  slud       String? 
+  title      String  @default("")
+  videoUrl   String
+  thumbnail  String
+  userId     String 
+
+  user       User   @relation(fields: [userId],references: [id])
+
+
+  createAt   DateTime  @default(now())
+}
+
+enum Gender{
+  Male
+  Female  
+  Others
+}
+
+model Subscription{
+  id   String @id @default(uuid())
+  channelId  String 
+  userId   String
+
+  channel  User @relation("ChannelSubscriptions",fields: [channelId],references: [id])
+  user     User @relation("UserSubscriptions",fields: [userId],references: [id])
+
+ @@unique([channelId,userId])
+}
+
+model likes{
+  id String @id @default(uuid())
+  userId    String 
+  uploadId  String
+
+}
+
+model comments{
+   id String @id @default(uuid())
+   comments String
+   userId String
+   uploadId    String
+   createdAt  DateTime  @default(now())
+}
+
+
+model wathHistory{
+  id String @id @default(uuid())
+  userid String
+  uploadId String
+  matchedData String
+}
