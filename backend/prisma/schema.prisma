@@ -23,6 +23,8 @@ model User{
   subscriberCount  Int   @default(0)
   description     String?
   uploads         Uploads[]
+  like             Like[]
+  comments         Comments[]
 
   subscribers      Subscription[] @relation("ChannelSubscriptions")
 
@@ -39,7 +41,11 @@ model Uploads {
   userId     String 
 
   user       User   @relation(fields: [userId],references: [id])
+  likes      Like[]
+  likeCount  Int @default(0)
 
+  comments  Comments[]
+  commentCount Int @default(0)
 
   createAt   DateTime  @default(now())
 }
@@ -51,9 +57,9 @@ enum Gender{
 }
 
 model Subscription{
-  id   String @id @default(uuid())
+  id         String @id @default(uuid())
   channelId  String 
-  userId   String
+  userId     String
 
   channel  User @relation("ChannelSubscriptions",fields: [channelId],references: [id])
   user     User @relation("UserSubscriptions",fields: [userId],references: [id])
@@ -61,19 +67,30 @@ model Subscription{
  @@unique([channelId,userId])
 }
 
-model likes{
+model Like{
   id String @id @default(uuid())
   userId    String 
   uploadId  String
 
+  user      User @relation(fields: [userId],references: [id])
+  upload    Uploads  @relation(fields: [uploadId],references: [id])
+   
+  createdAt  DateTime @default(now())
+
+  @@unique([userId,uploadId])
 }
 
-model comments{
-   id String @id @default(uuid())
-   comments String
-   userId String
-   uploadId    String
+model Comments{
+   id         String @id @default(uuid())
+   comments   String
+   userId     String
+   uploadId   String
+
+   user         User @relation(fields: [userId],references: [id])
+   upload        Uploads @relation(fields: [uploadId],references: [id])
+
    createdAt  DateTime  @default(now())
+
 }
 
 

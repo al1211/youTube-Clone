@@ -41,7 +41,17 @@ const VideotPage = () => {
           }
         })
   }
-  console.log(resomendedVideo)
+  const handleLike=async()=>{
+      const curentUser=localStorage.getItem("token");
+      console.log(curentUser);
+      const res =  await axios.post("http://localhost:3000/api/likes",{
+        uploadId:vidoeDetails.id,
+        },{
+          headers:{
+            Authorization:`Bearer ${curentUser}`
+          }
+        })
+  }
   return (
     <div style={{display:'flex'}} >
       {!isLoading ?<div style={{width:"1000px"}}>
@@ -53,6 +63,7 @@ const VideotPage = () => {
       <div style={{display:"flex",margin:10,gap:10,alignItems:"center"}}>
         {vidoeDetails.user.channelName}
         <button onClick={handleSubscribe} style={{backgroundColor:"black",color:"white ",padding:10, borderRadius:20}}>Subscribe</button>
+        <button onClick={handleLike} style={{backgroundColor:"black",color:"white ",padding:10, borderRadius:20}}>Like</button>
       </div>
       
       <div>

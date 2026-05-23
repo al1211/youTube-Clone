@@ -370,6 +370,122 @@ app.post("/api/subscriber", async (req: Request, res: Response) => {
   });
 });
 
+app.post("/api/likes", async (req: Request, res: Response) => {
+  const {  uploadId } = req.body;
+  const userId=getUserID(req)
+
+  if (!uploadId || !userId) {
+    return res.status(400).json({
+      success: false,
+      message: "uploadId and userId required",
+    });
+  }
+
+  // find upload
+  const uploadChannel = await prisma.uploads.findFirst({
+    where: {
+      id: uploadId,
+    },
+  });
+
+  if (!uploadChannel) {
+    return res.status(404).json({
+      success: false,
+      message: "Video not found",
+    });
+  }
+
+  // own video like check
+  if (uploadChannel.userId === userId) {
+    return res.status(401).json({
+      success: false,
+      message: "You can't like your own video",
+    });
+  }
+
+  // already liked
+  const exist = await prisma.like.findUnique({
+    where: {
+      userId_uploadId: {
+        userId,
+        uploadId,
+      },
+    },
+  });
+
+  if (exist) {
+    return res.status(400).json({
+      success: false,
+      message: "Already liked",
+    });
+  }
+
+  // create like
+  const likes = await prisma.like.create({
+    data: {
+      userId,
+      uploadId,
+    },
+  });
+
+  // increment like count
+  await prisma.uploads.update({
+    where: {
+      id: uploadId,
+    },
+    data: {
+      likeCount: {
+        increment: 1,
+      },
+    },
+  });
+
+  return res.status(201).json({
+    success: true,
+    data: likes,
+  });
+});
+
+app.post("/api/comments",async(req:Request,res:Response)=>{
+  const {comment,uploadId,userId}=req.body;
+
+  if(!uploadId || !userId){
+     return res.status(400).json({
+      success: false,
+      message: "uploadId and userId required",
+    });
+  }
+  // find channel
+
+  const uploadChannel=await prisma.uploads.findFirst({
+    where:uploadId
+  })
+
+  if(!uploadChannel){
+    res.status(404).json({
+      success:false,
+      message:"Video not found"
+    })
+    return;
+  }
+  if(uploadChannel?.userId == userId){
+    res.status(401).json({
+      success:false,
+      message:"You can't comment own videos"
+    })
+  }
+
+  // create comment
+
+  const createComment=await prisma.comments.create({
+    data:{
+         comments:comment,
+         userId:userId,
+         uploadId:uploadId
+    }
+  })
+})
+
 
 
 // ─── 404 & Global Error Handler ───────────────────────────────────────────
