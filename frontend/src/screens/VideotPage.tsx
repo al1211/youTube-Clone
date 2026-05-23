@@ -11,6 +11,7 @@ const VideotPage = () => {
   const [resomendedVideo,setRecomendedVideo]=useState([])
   const [hasLoading,SetHasLoading]=useState(true);
   const navigate=useNavigate();
+  const [comments,setComments]=useState("")
 
   useEffect(()=>{
     axios.get("http://localhost:3000/api/video/"+id).then((response)=>{
@@ -52,6 +53,17 @@ const VideotPage = () => {
           }
         })
   }
+  const handleComments=async()=>{
+    const curentUser=localStorage.getItem("token");
+    const res=await axios.post("http://localhost:3000/api/comments",{
+      uploadId:vidoeDetails.id,
+      comment:comments
+    },{
+      headers:{
+        Authorization:`Bearer ${curentUser}`
+      }
+    })
+  }
   return (
     <div style={{display:'flex'}} >
       {!isLoading ?<div style={{width:"1000px"}}>
@@ -64,6 +76,10 @@ const VideotPage = () => {
         {vidoeDetails.user.channelName}
         <button onClick={handleSubscribe} style={{backgroundColor:"black",color:"white ",padding:10, borderRadius:20}}>Subscribe</button>
         <button onClick={handleLike} style={{backgroundColor:"black",color:"white ",padding:10, borderRadius:20}}>Like</button>
+      </div>
+      <div>
+        <input type="text" placeholder="comments...." onChange={(e)=>setComments(e.target.value)}/>
+        <button onClick={handleComments} style={{backgroundColor:"black",color:"white ",padding:10, borderRadius:20}}>Comments</button>
       </div>
       
       <div>

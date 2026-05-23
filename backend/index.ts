@@ -447,7 +447,8 @@ app.post("/api/likes", async (req: Request, res: Response) => {
 });
 
 app.post("/api/comments",async(req:Request,res:Response)=>{
-  const {comment,uploadId,userId}=req.body;
+  const {comment,uploadId}=req.body;
+  const userId=getUserID(req)
 
   if(!uploadId || !userId){
      return res.status(400).json({
@@ -455,10 +456,18 @@ app.post("/api/comments",async(req:Request,res:Response)=>{
       message: "uploadId and userId required",
     });
   }
+  if (!comment) {
+  return res.status(400).json({
+    success: false,
+    message: "Comment required",
+  });
+}
   // find channel
 
   const uploadChannel=await prisma.uploads.findFirst({
-    where:uploadId
+    where:{
+      id:uploadId
+    }
   })
 
   if(!uploadChannel){
@@ -473,6 +482,7 @@ app.post("/api/comments",async(req:Request,res:Response)=>{
       success:false,
       message:"You can't comment own videos"
     })
+    return
   }
 
   // create comment
@@ -483,6 +493,22 @@ app.post("/api/comments",async(req:Request,res:Response)=>{
          userId:userId,
          uploadId:uploadId
     }
+  })
+
+  await prisma.uploads.update({
+    where:{
+      id:uploadId
+    },
+    data:{
+    commentCount:{
+      increment:1
+    }
+    }
+  })
+
+  res.status(201).json({
+    success:true,
+    data:createComment
   })
 })
 
