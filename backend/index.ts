@@ -513,6 +513,10 @@ app.post("/api/comments",async(req:Request,res:Response)=>{
 })
 
 
+app.get("/api/watch",async(req:Request,res:Response)=>{
+    
+})
+
 
 // ─── 404 & Global Error Handler ───────────────────────────────────────────
 app.use((_req: Request, res: Response) => {
